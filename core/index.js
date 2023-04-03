@@ -1,4 +1,5 @@
 export {
   Dep,
-  effectWatch
+  effectWatch,
+  reactive
 } from './reactivity.js'
