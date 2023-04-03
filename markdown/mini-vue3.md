@@ -51,3 +51,37 @@ export default {
 这个官方提供的插件就可以帮我们把，sfc编译成js文件
 
 其实就是利用了上面说到的`@vue/compiler-sfc`
+
+#### 例子
+
+```css
+npm init -y
+npm i @vue/reactivity
+```
+
+然后，创建`index.html 和main.js，其中 index.html 导入了 main.js type=module`
+
+在`main.js`中
+
+```js
+import {
+  ref,
+  effect
+} from './node_modules/@vue/reactivity/dist/reactivity.esm-browser.js' // 因为是跑在浏览器上的
+
+const a = ref(10);
+let b = 0;
+
+effect(() => {
+  b = a.value + 10;
+  console.log(b);
+})
+a.value = 20;
+```
+
+看到打印`20 和 30`，执行顺序，逻辑什么的，略
+
+
+
+
+
