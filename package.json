@@ -2,14 +2,18 @@
   "name": "mini-vue3",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "repository": "git@github.com:Garril/mini-vue3.git",
   "author": "Garril <zev20010120@163.com>",
   "license": "MIT",
   "devDependencies": {
-    "commitizen": "^4.3.0"
+    "@rollup/plugin-babel": "^6.0.3",
+    "commitizen": "^4.3.0",
+    "rollup": "^3.20.2"
   },
   "scripts": {
-    "commit": "npx cz"
+    "commit": "npx cz",
+    "build": "rollup --config"
   },
   "config": {
     "commitizen": {
