@@ -9,7 +9,12 @@ function patchProps(el, key, preValue, nextValue) {
   if (key.startsWith('on')) {
     el.addEventListener(key.slice(2).toLowerCase(), nextValue)
   } else {
-    el.setAttribute(key, nextValue)
+    // props
+    if (nextValue === null) {
+      el.removeAttribute(key)
+    } else {
+      el.setAttribute(key, nextValue)
+    }
   }
 }
 
@@ -44,4 +49,45 @@ export function mountElement(vnode, container) {
     }
   }
   insert(el, container)
+}
+// n1 -> oldVnode
+// n2 -> newVnode
+export function diff(n1, n2) {
+  // 1.tag
+  if (n1.tag !== n2.tag) {
+    n1.el.replaceWith(createElement(n2.tag))
+  } else {
+    // props
+    /*
+      old = {a}
+      new = {a,b}
+      (add b)
+    */
+    const oldProps = n1.props
+    const newProps = n2.props
+    const el = (n2.el = n1.el)
+    if (newProps) {
+      for (const key in newProps) {
+        if (oldProps[key] !== newProps[key]) {
+          patchProps(el, key, oldProps[key], newProps[key])
+        }
+      }
+    }
+    /*
+      old = {a,b}
+      new = {b}
+      (remove a)
+    */
+    if (oldProps) {
+      for (const key in oldProps) {
+        if (!(key in newProps)) {
+          patchProps(el, key, oldProps[key], null)
+        }
+      }
+    }
+    // children
+  }
+  // 2.props
+
+  // 3.children
 }

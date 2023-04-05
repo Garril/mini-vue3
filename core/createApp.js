@@ -1,13 +1,25 @@
-import { effectWatch, mountElement } from './index'
+import { effectWatch } from './reactivity'
+import { mountElement, diff } from './renderer'
 export function createApp(rootComponent) {
   // app
   return {
     mount(rootContainer) {
       const setupResult = rootComponent.setup()
+      let prevSubTree
+      let isMounted = false
+
       effectWatch(() => {
-        rootContainer.textContent = ``
-        const subTree = rootComponent.render(setupResult)
-        mountElement(subTree, rootContainer)
+        if (!isMounted) {
+          isMounted = true
+          const subTree = rootComponent.render(setupResult)
+          prevSubTree = subTree
+          mountElement(subTree, rootContainer)
+        } else {
+          const subTree = rootComponent.render(setupResult)
+          // diff
+          diff(prevSubTree, subTree)
+          prevSubTree = subTree
+        }
       })
     }
   }
