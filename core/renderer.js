@@ -26,6 +26,10 @@ function createTextNode(text) {
   return document.createTextNode(text)
 }
 
+function remove(el, parent) {
+  parent.removeChild(el)
+}
+
 export function mountElement(vnode, container) {
   const { tag, props, children } = vnode
   const el = (vnode.el = createElement(tag))
@@ -52,12 +56,13 @@ export function mountElement(vnode, container) {
 }
 // n1 -> oldVnode
 // n2 -> newVnode
+// 真正diff算法路径：runtime-core/renderer.ts/patchElement
 export function diff(n1, n2) {
   // 1.tag
   if (n1.tag !== n2.tag) {
     n1.el.replaceWith(createElement(n2.tag))
   } else {
-    // props
+    // 2.props
     /*
       old = {a}
       new = {a,b}
@@ -85,9 +90,58 @@ export function diff(n1, n2) {
         }
       }
     }
-    // children
+    // 3.children
+    /*
+      1. new string old string
+      2. new string old array
+      3. new array old string
+      4. new array old array
+    */
+    const oldChildren = n1.children
+    const newChildren = n2.children
+    if (typeof newChildren === 'string') {
+      if (typeof oldChildren === 'string' && oldChildren !== newChildren) {
+        // 1. new string old string
+        el.innerText = newChildren
+      } else if (Array.isArray(oldChildren)) {
+        // 2. new string old array
+        el.innerText = newChildren
+      }
+    } else if (Array.isArray(newChildren)) {
+      if (typeof oldChildren === 'string') {
+        // 3. new array old string
+        el.innerText = ''
+        newChildren.forEach((child) => {
+          mountElement(child, el)
+        })
+      } else if (Array.isArray(oldChildren)) {
+        // 4. new array old array(暴力版)
+        /*
+          A. new > old  -> add
+          B. new < old  -> remove
+          这里没有考虑 [a,b,c] -> [a,c,b]的节点复用情况
+        */
+        const commonLen = Math.min(newChildren.length, oldChildren.length)
+        for (let i = 0; i < commonLen; i++) {
+          const oldVnode = oldChildren[i]
+          const newVnode = newChildren[i]
+          diff(oldVnode, newVnode)
+        }
+        // A. new > old  -> add
+        if (newChildren.length > commonLen) {
+          for (let i = commonLen; i < newChildren.length; i++) {
+            const vnode = newChildren[i]
+            mountElement(vnode, el)
+          }
+        }
+        // B. new < old  -> remove
+        if (oldChildren.length > commonLen) {
+          for (let i = commonLen; i < oldChildren.length; i++) {
+            const vnode = oldChildren[i]
+            remove(vnode.el, el)
+          }
+        }
+      }
+    }
   }
-  // 2.props
-
-  // 3.children
 }
