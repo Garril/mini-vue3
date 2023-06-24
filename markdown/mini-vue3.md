@@ -93,6 +93,26 @@ npx tsc --init
 yarn add jest @types/jest --dev
 tsconfig.json加入
   "types":["jest"]
-  
 ```
 
+解决es6->es5
+
+```css
+https://jestjs.io/docs/getting-started
+
+yarn add --dev babel-jest @babel/core @babel/preset-env
+yarn add --dev @babel/preset-typescript
+```
+
+配置babel.config.js
+
+```javascript
+module.exports = {
+  presets: [
+    ['@babel/preset-env', {targets: {node: 'current'}}],
+    '@babel/preset-typescript',
+  ],
+};
+```
+
+配置不生效，就改名：babel.config.cjs
