@@ -83,5 +83,16 @@ a.value = 20;
 
 
 
+## jest
 
+```css
+yarn add typescript --dev
+npx tsc --init
+生成tsconfig.json
+
+yarn add jest @types/jest --dev
+tsconfig.json加入
+  "types":["jest"]
+  
+```
 
