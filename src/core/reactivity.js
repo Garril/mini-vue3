@@ -22,15 +22,26 @@ export class Dep {
   // 触发依赖
   notify() {
     this.effects.forEach((effect) => {
-      effect();
+      effect.run();
     });
   }
 }
 
+class ReactiveEffect {
+  private _fn: any;
+  constructor(fn) {
+    this._fn = fn;
+  }
+  run() {
+    curEffect = this;
+    return this._fn();
+  }
+}
+
 export function effectWatch(fn) {
-  curEffect = fn;
-  fn();
-  curEffect = null;
+  curEffect = new ReactiveEffect(fn);
+  curEffect.run();
+  return curEffect.run.bind(curEffect);
 }
 
 const targetMap = new WeakMap();
