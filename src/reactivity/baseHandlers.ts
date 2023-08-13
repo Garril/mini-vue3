@@ -1,4 +1,5 @@
 import { track, trigger } from './effect';
+import { ReactiveFlags } from './reactive';
 
 // create when it init,then the function won't be called many times.
 const getter = createGetter(false);
@@ -7,6 +8,11 @@ const setter = createSetter();
 
 function createGetter(isReadonly: boolean = false) {
   return function get(target, key, receiver) {
+    if (key == ReactiveFlags.IS_REACTIVE) {
+      return !isReadonly;
+    } else if (key == ReactiveFlags.IS_READONLY) {
+      return isReadonly;
+    }
     const val = Reflect.get(target, key, receiver);
     if (!isReadonly) {
       track(target, key);
