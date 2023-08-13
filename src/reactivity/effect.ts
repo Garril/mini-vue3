@@ -26,19 +26,25 @@ export class Dep {
   // 触发依赖
   notify() {
     this.effects.forEach((effect: ReactiveEffect) => {
-      effect.run();
+      if (effect.scheduler) {
+        effect.scheduler();
+      } else {
+        effect.run();
+      }
     });
   }
 }
 
 export class ReactiveEffect {
   private _fn: any;
-  constructor(fn: any) {
+  public scheduler: any;
+  constructor(fn: any, scheduler?: any) {
     this._fn = fn;
+    this.scheduler = scheduler;
   }
   run() {
     activeEffect = this;
-    this._fn();
+    return this._fn();
   }
 }
 
@@ -65,7 +71,10 @@ export function trigger(target, key) {
   dep.notify();
 }
 
-export function effect(fn) {
-  const _effect = new ReactiveEffect(fn);
+export function effect(fn, options: any = {}) {
+  const { scheduler } = options;
+  const _effect = new ReactiveEffect(fn, scheduler);
   _effect.run();
+  const runner = _effect.run.bind(_effect);
+  return runner;
 }
