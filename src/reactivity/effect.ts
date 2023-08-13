@@ -3,7 +3,7 @@ const targetMap = new WeakMap();
 
 export class Dep {
   private _val: any;
-  private effects: Set<ReactiveEffect>;
+  public effects: Set<ReactiveEffect>;
 
   constructor(value) {
     this._val = value;
@@ -20,6 +20,7 @@ export class Dep {
   // 收集依赖
   depend() {
     if (activeEffect) {
+      activeEffect.deps.push(this);
       this.effects.add(activeEffect);
     }
   }
@@ -37,15 +38,30 @@ export class Dep {
 
 export class ReactiveEffect {
   private _fn: any;
-  public scheduler: any;
-  constructor(fn: any, scheduler?: any) {
+  public deps: Array<any>;
+  private active: boolean = true;
+  public scheduler: Function | undefined;
+  public onStop?: () => void;
+  constructor(fn: any, options?: any) {
     this._fn = fn;
-    this.scheduler = scheduler;
+    this.deps = [];
+    Object.assign(this, options);
   }
   run() {
     activeEffect = this;
     return this._fn();
   }
+  stop() {
+    this.active && cleanupEffect(this);
+    this.onStop && this.onStop();
+    this.active = false;
+  }
+}
+
+function cleanupEffect(effect: ReactiveEffect) {
+  effect.deps.forEach((dep: Dep) => {
+    dep.effects.delete(effect);
+  });
 }
 
 export function getDep(target, key) {
@@ -72,9 +88,13 @@ export function trigger(target, key) {
 }
 
 export function effect(fn, options: any = {}) {
-  const { scheduler } = options;
-  const _effect = new ReactiveEffect(fn, scheduler);
+  const _effect = new ReactiveEffect(fn, options);
   _effect.run();
-  const runner = _effect.run.bind(_effect);
+  const runner: any = _effect.run.bind(_effect);
+  runner.effect = _effect;
   return runner;
+}
+
+export function stop(runner) {
+  runner.effect.stop();
 }
