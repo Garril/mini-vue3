@@ -73,6 +73,10 @@ describe('effect', () => {
     expect(dummy).toBe(2);
     // stopped effect should still be manually callable
     runner();
+    // if you change call runner to  obj.prop++
+    // it won't be right,because it's get and set but only set
+    // it equals obj.prop = obj.prop + 1. when you get,it will track again.
+    // so we need adding the variable "shouldTrack"
     expect(dummy).toBe(3);
   });
   // onStop

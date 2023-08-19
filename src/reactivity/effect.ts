@@ -1,4 +1,5 @@
 let activeEffect: ReactiveEffect;
+let shouldTrack: boolean;
 const targetMap = new WeakMap();
 
 export class Dep {
@@ -20,6 +21,7 @@ export class Dep {
   // 收集依赖
   depend() {
     if (activeEffect) {
+      if (this.effects.has(activeEffect)) return;
       activeEffect.deps.push(this);
       this.effects.add(activeEffect);
     }
@@ -48,13 +50,23 @@ export class ReactiveEffect {
     Object.assign(this, options);
   }
   run() {
+    if (!this.active) {
+      return this._fn();
+    }
     activeEffect = this;
-    return this._fn();
+    shouldTrack = true;
+    const res = this._fn();
+    shouldTrack = false;
+    return res;
   }
   stop() {
-    this.active && cleanupEffect(this);
-    this.onStop && this.onStop();
-    this.active = false;
+    if (this.active) {
+      cleanupEffect(this);
+      if (this.onStop) {
+        this.onStop();
+      }
+      this.active = false;
+    }
   }
 }
 
@@ -62,6 +74,7 @@ function cleanupEffect(effect: ReactiveEffect) {
   effect.deps.forEach((dep: Dep) => {
     dep.effects.delete(effect);
   });
+  effect.deps.length = 0;
 }
 
 export function getDep(target, key) {
@@ -78,7 +91,12 @@ export function getDep(target, key) {
   return dep;
 }
 
+function isTracking() {
+  return shouldTrack && activeEffect != undefined;
+}
+
 export function track(target, key) {
+  if (!isTracking()) return;
   const dep = getDep(target, key);
   dep.depend();
 }
