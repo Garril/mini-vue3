@@ -28,7 +28,7 @@ function createSetter() {
     return res;
   };
 }
-
+// normal proxy event handlers
 export const mutableHandlers = {
   get: getter,
   set: setter,
@@ -42,7 +42,7 @@ export const mutableHandlers = {
     return true;
   }
 };
-
+// proxy event handlers for readonly
 export const readOnlyHandlers = {
   get: readonlyGetter,
   set(target, key, value) {
