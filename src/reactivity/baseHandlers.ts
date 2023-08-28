@@ -5,9 +5,10 @@ import { ReactiveFlags, reactive, readonly } from './reactive';
 // create when it init,then the function won't be called many times.
 const getter = createGetter(false);
 const readonlyGetter = createGetter(true);
+const shallowReadonlyGetter = createGetter(true, true);
 const setter = createSetter();
 
-function createGetter(isReadonly: boolean = false) {
+function createGetter(isReadonly: boolean = false, isShallow: boolean = false) {
   return function get(target, key, receiver) {
     if (key == ReactiveFlags.IS_REACTIVE) {
       return !isReadonly;
@@ -15,6 +16,11 @@ function createGetter(isReadonly: boolean = false) {
       return isReadonly;
     }
     const val = Reflect.get(target, key, receiver);
+    // if the reactive obj(proxy) is shallow,
+    // it doesn't matter whether its props is object or not,just return.
+    if (isShallow) {
+      return val;
+    }
     // if the val was an object,it should be transformed to reactive object.
     if (isObject(val)) {
       return isReadonly ? readonly(val) : reactive(val);
@@ -64,3 +70,6 @@ export const readOnlyHandlers = {
     return true;
   }
 };
+export const shallowReadonlyHandlers = Object.assign({}, readOnlyHandlers, {
+  get: shallowReadonlyGetter
+});
