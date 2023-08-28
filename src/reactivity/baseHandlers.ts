@@ -1,5 +1,6 @@
+import { isObject } from '../shared';
 import { track, trigger } from './effect';
-import { ReactiveFlags } from './reactive';
+import { ReactiveFlags, reactive, readonly } from './reactive';
 
 // create when it init,then the function won't be called many times.
 const getter = createGetter(false);
@@ -14,6 +15,10 @@ function createGetter(isReadonly: boolean = false) {
       return isReadonly;
     }
     const val = Reflect.get(target, key, receiver);
+    // if the val was an object,it should be transformed to reactive object.
+    if (isObject(val)) {
+      return isReadonly ? readonly(val) : reactive(val);
+    }
     if (!isReadonly) {
       track(target, key);
     }
