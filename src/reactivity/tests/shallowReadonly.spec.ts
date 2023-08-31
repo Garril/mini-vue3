@@ -1,7 +1,7 @@
 import { shallowReadonly, isReadonly } from '../reactive';
 
 describe('shallowReadonly', () => {
-  test('should not make non-reactive properties reactive', () => {
+  it('should not make non-reactive properties reactive', () => {
     // the nest object in reactive obj shouldn't be reactive/readonly,this's shallow.
     const props = shallowReadonly({ n: { foo: 1 } });
     expect(isReadonly(props)).toBe(true);

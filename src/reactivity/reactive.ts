@@ -29,6 +29,11 @@ export function isReactive(obj) {
 export function isReadonly(obj) {
   return !!obj[ReactiveFlags.IS_READONLY];
 }
+// check if an object is a proxy created by reactive/readonly
+export function isProxy(raw) {
+  return isReactive(raw) || isReadonly(raw);
+}
+
 // create reactive obj
 function createActiveObject(raw: any, proxyHandler) {
   return new Proxy(raw, proxyHandler);

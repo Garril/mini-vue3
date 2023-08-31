@@ -1,4 +1,5 @@
-import { readonly, isReadonly } from '../reactive';
+import { readonly, isReadonly, isProxy } from '../reactive';
+
 describe('readonly', () => {
   it('make nested values readonly', () => {
     // can be set
@@ -19,5 +20,10 @@ describe('readonly', () => {
     });
     user.age = 11;
     expect(console.warn).toBeCalled();
+  });
+  test('check if an object is a proxy created by readonly', () => {
+    const original = { age: 18 };
+    const wrapped = readonly(original);
+    expect(isProxy(wrapped)).toBe(true);
   });
 });
