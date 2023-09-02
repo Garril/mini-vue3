@@ -20,21 +20,11 @@ export class Dep {
   }
   // 收集依赖
   depend() {
-    if (activeEffect) {
-      if (this.effects.has(activeEffect)) return;
-      activeEffect.deps.push(this);
-      this.effects.add(activeEffect);
-    }
+    trackEffects(this);
   }
   // 触发依赖
   notify() {
-    this.effects.forEach((effect: ReactiveEffect) => {
-      if (effect.scheduler) {
-        effect.scheduler();
-      } else {
-        effect.run();
-      }
-    });
+    triggerEffects(this.effects);
   }
 }
 
@@ -91,15 +81,36 @@ export function getDep(target, key) {
   return dep;
 }
 
-function isTracking() {
+export function isTracking() {
   return shouldTrack && activeEffect != undefined;
+}
+// collect dependency
+// For reuse and implement ref, change depend to trackEffects
+export function trackEffects(dep: Dep) {
+  if (activeEffect) {
+    if (dep.effects.has(activeEffect)) return;
+    activeEffect.deps.push(dep);
+    dep.effects.add(activeEffect);
+  }
+}
+// trigger dependency
+export function triggerEffects(effects: Set<ReactiveEffect>) {
+  effects &&
+    effects.forEach((effect: ReactiveEffect) => {
+      if (effect.scheduler) {
+        effect.scheduler();
+      } else {
+        effect.run();
+      }
+    });
 }
 
 export function track(target, key) {
   if (!isTracking()) return;
   const dep = getDep(target, key);
-  dep.depend();
+  trackEffects(dep);
 }
+
 export function trigger(target, key) {
   const dep = getDep(target, key);
   dep.notify();
