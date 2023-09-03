@@ -6,6 +6,7 @@ class RefImpl {
   private _value: any = null;
   public dep: Dep;
   private _rawValue: any;
+  public __v_isRef = true;
   /**
    *  Refs don't have as many keys as objects
    *  it only have value
@@ -38,4 +39,11 @@ function convert(val) {
 
 export function ref(value) {
   return new RefImpl(value);
+}
+
+export function isRef(raw: any) {
+  return !!raw.__v_isRef;
+}
+export function unRef(raw: any) {
+  return isRef(raw) ? raw.value : raw;
 }
