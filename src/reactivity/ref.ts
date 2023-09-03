@@ -47,3 +47,19 @@ export function isRef(raw: any) {
 export function unRef(raw: any) {
   return isRef(raw) ? raw.value : raw;
 }
+
+const proxyRefHandlers = {
+  get(target, key) {
+    return unRef(Reflect.get(target, key));
+  },
+  set(target, key, newVal) {
+    if (!isRef(newVal) && isRef(target[key])) {
+      return (target[key].value = newVal);
+    } else {
+      return Reflect.set(target, key, newVal);
+    }
+  }
+};
+export function proxyRefs(raw: any) {
+  return new Proxy(raw, proxyRefHandlers);
+}
