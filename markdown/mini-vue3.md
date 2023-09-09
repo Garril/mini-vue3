@@ -116,3 +116,86 @@ module.exports = {
 ```
 
 配置不生效，就改名：babel.config.cjs
+
+
+
+## rollup
+
+```js
+yarn add rollup --dev
+yarn add @rollup/plugin-typescript --dev
+// 这个看情况 yarn add tslib --dev
+// "build": "rollup -c rollup.config.js"
+// 执行 yarn build时,src/index.ts/
+export * from './runtime-core';
+// 报错[!] RollupError: Could not resolve "./runtime-core" from "src/index.ts"
+// tsconfig.json配置了"moduleResolution": "node" ，但是还是报错,则如下：
+yarn add @rollup/plugin-node-resolve --dev
+// rollup.config.js
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+plugins: [
+    nodeResolve({
+        extensions: ['.mjs', '.js', '.json', '.ts'],
+    }),
+],
+// 引入json问题 --- does nothing!
+yarn add @rollup/plugin-json --dev
+import json from '@rollup/plugin-json';
+plugins: [
+  json()
+]
+import pkg from './package.json' assert { type: "json" }; // it works
+// right way to get pkg info
+import { readFileSync } from 'fs';
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+```
+
+```js
+import { babel } from '@rollup/plugin-babel'
+
+export default {
+  input: './test/framework/main.js', //入口文件
+  output: {
+    file: './test/dist/bundle.js', //打包后的存放文件
+    format: 'cjs', //输出格式 amd es6 iife umd cjs
+    name: 'bundleName', //如果iife,umd需要指定一个全局变量
+    sourcemap: true //生成bundle.map.js文件，方便调试
+  },
+  plugins: [
+    babel({
+      babelHelpers: 'bundled',
+      exclude: 'node_modules/**'
+    })
+  ]
+}
+```
+
+```js
+import typescript from '@rollup/plugin-typescript';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+
+export default {
+  input: './src/index.ts', // entry file
+  output: [
+    {
+      format: 'cjs', //output format: amd es6 iife umd cjs
+      file: 'lib/guide-mini-vue.cjs.js' // package files path
+    },
+    {
+      format: 'es', //output format: amd es6 iife umd cjs
+      file: 'lib/guide-mini-vue.esm.js' // package files path
+    }
+  ],
+  plugins: [
+    // we need parse typescript
+    typescript(),
+    nodeResolve({
+      extensions: ['.mjs', '.js', '.json', '.ts']
+    })
+  ]
+};
+
+```
+
+
+
