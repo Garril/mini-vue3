@@ -6,8 +6,14 @@ export const App = {
       id: "root",
       class: ["red", "bolder"]
     },
-      // `hello, mini-vue,${this.msg}`
-      [h("p", { class: "red" }, "hi"), h("p", { class: "blue" }, "mini-vue")]);
+      // [h("p", { class: "red" }, "hi"), h("p", { class: "blue" }, "mini-vue")];
+      `hello, mini-vue,${this.msg}`
+      /* the "this" in render actually is a proxy
+        because the "this" includes "setupState、$el、$data" and so on
+        we need make it more convenient for users,just use "this" to get all.
+        Implementation ideas: create proxy when component created,bind this when render called.
+      */
+    )
   },
   setup() {
     return {

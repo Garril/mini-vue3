@@ -25,7 +25,8 @@
   "scripts": {
     "commit": "npx cz",
     "build": "rollup -c rollup.config.js",
-    "test": "jest"
+    "test": "jest",
+    "sync": "git reset --hard origin/main"
   },
   "config": {
     "commitizen": {

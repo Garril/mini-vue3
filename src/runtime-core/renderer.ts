@@ -26,8 +26,17 @@ function processElement(vnode: any, container: any) {
 }
 
 function mountComponent(vnode: any, container: any) {
+  /* instance may be: 
+    const component = { 
+      vnode: vnode --> { type,props,children }, 
+      type: vnode.type --> { render,setup }
+    };  */
   const instance = createComponentInstance(vnode);
+  /* instance attached lots of attributes by setupComponent
+    such as: 
+      setupState and render (it's just run the methods before) */
   setupComponent(instance);
+  // get tree and patch
   setupRenderEffect(instance, container);
 }
 
@@ -57,8 +66,9 @@ function mountChildren(vnode, container) {
 }
 
 function setupRenderEffect(instance, container) {
+  const { proxy } = instance;
   // get vnode
-  const subTree = instance.render();
+  const subTree = instance.render.call(proxy);
   // get element
   // mountElement
   patch(subTree, container);
