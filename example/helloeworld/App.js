@@ -6,7 +6,13 @@ export const App = {
       'div',
       {
         id: 'root',
-        class: ['red', 'bolder']
+        class: ['red', 'bolder'],
+        onClick() {
+          console.log("click");
+        },
+        onMousedown() {
+          console.log("mouseDown");
+        }
       },
       // [h("p", { class: "red" }, "hi"), h("p", { class: "blue" }, "mini-vue")];
       `hello, mini-vue,${this.msg}`

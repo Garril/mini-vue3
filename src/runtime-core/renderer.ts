@@ -1,4 +1,4 @@
-import { isObject } from '../shared';
+import { isObject, isOnEvent } from '../shared';
 import { ShapeFlags } from '../shared/shapeFlags';
 import { createComponentInstance, setupComponent } from './component';
 
@@ -49,7 +49,13 @@ function mountElement(vnode: any, container: any) {
   // props
   for (const key in props) {
     const val = props[key];
-    el.setAttribute(key, val);
+    if (isOnEvent(key)) {
+      // event listener
+      const eventName = key.slice(2).toLowerCase();
+      el.addEventListener(eventName, val);
+    } else {
+      el.setAttribute(key, val);
+    }
   }
   // children
   if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
