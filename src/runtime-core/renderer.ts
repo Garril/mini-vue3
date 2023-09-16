@@ -25,25 +25,25 @@ function processElement(vnode: any, container: any) {
   mountElement(vnode, container);
 }
 
-function mountComponent(vnode: any, container: any) {
+function mountComponent(initVnode: any, container: any) {
   /* instance may be: 
     const component = { 
       vnode: vnode --> { type,props,children }, 
       type: vnode.type --> { render,setup }
     };  */
-  const instance = createComponentInstance(vnode);
+  const instance = createComponentInstance(initVnode);
   /* instance attached lots of attributes by setupComponent
     such as: 
       setupState and render (it's just run the methods before) */
   setupComponent(instance);
   // get tree and patch
-  setupRenderEffect(instance, container);
+  setupRenderEffect(instance, initVnode, container);
 }
 
 function mountElement(vnode: any, container: any) {
   const { type, props, children } = vnode;
-  // create dom
-  const el = document.createElement(type);
+  // create dom(element type vnode like: "div")
+  const el = (vnode.el = document.createElement(type));
   // props
   for (const key in props) {
     const val = props[key];
@@ -65,11 +65,13 @@ function mountChildren(vnode, container) {
   });
 }
 
-function setupRenderEffect(instance, container) {
+function setupRenderEffect(instance, initVnode, container) {
   const { proxy } = instance;
   // get vnode
   const subTree = instance.render.call(proxy);
-  // get element
   // mountElement
   patch(subTree, container);
+  // after all the element mounted.
+  // subTree is the root vnode,we can get el through it,attach it into component's vnode
+  initVnode.el = subTree.el;
 }
