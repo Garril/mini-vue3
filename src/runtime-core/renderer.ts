@@ -1,4 +1,5 @@
 import { isObject } from '../shared';
+import { ShapeFlags } from '../shared/shapeFlags';
 import { createComponentInstance, setupComponent } from './component';
 
 export function render(vnode, container) {
@@ -8,10 +9,11 @@ export function render(vnode, container) {
 function patch(vnode, container) {
   console.log('vnode.type: ', vnode.type);
   // check type of vnode
-  if (typeof vnode.type == 'string') {
+  const { shapeFlag } = vnode;
+  if (shapeFlag & ShapeFlags.ELEMENT) {
     // processElement (type == element)
     processElement(vnode, container);
-  } else if (isObject(vnode.type)) {
+  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
     // processComponent (type == component)
     processComponent(vnode, container);
   }
@@ -41,7 +43,7 @@ function mountComponent(initVnode: any, container: any) {
 }
 
 function mountElement(vnode: any, container: any) {
-  const { type, props, children } = vnode;
+  const { type, props, children, shapeFlag } = vnode;
   // create dom(element type vnode like: "div")
   const el = (vnode.el = document.createElement(type));
   // props
@@ -50,9 +52,9 @@ function mountElement(vnode: any, container: any) {
     el.setAttribute(key, val);
   }
   // children
-  if (typeof children == 'string') {
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children;
-  } else if (Array.isArray(children)) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(vnode, el);
   }
   // mount dom
