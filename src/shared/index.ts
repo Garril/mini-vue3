@@ -11,3 +11,6 @@ export const isOnEvent = (key: string) => {
   // is [A-Z],so onClick's "C" must be capitalized
   return /^on[A-Z]/.test(key);
 };
+
+export const hasOwn = (obj, key) =>
+  Object.prototype.hasOwnProperty.call(obj, key);

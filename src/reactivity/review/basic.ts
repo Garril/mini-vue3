@@ -45,14 +45,14 @@ const readOnlyHandlers = {
   // ...
 };
 // reactive.ts (how to use the function before in baseHandlers.ts)
-function createActiveObject(raw: any, proxyHandler) {
+function createReactiveObject(raw: any, proxyHandler) {
   return new Proxy(raw, proxyHandler);
 }
 function reactive(raw) {
-  return createActiveObject(raw, mutableHandlers);
+  return createReactiveObject(raw, mutableHandlers);
 }
 function readonly(raw) {
-  return createActiveObject(raw, readOnlyHandlers);
+  return createReactiveObject(raw, readOnlyHandlers);
 }
 function isReactive(obj) {
   return !!obj[ReactiveFlags.IS_REACTIVE];

@@ -1,16 +1,20 @@
+import { hasOwn } from '../shared';
+
 export const PublicInstanceProxyHanlders = {
   get({ _: instance }, key) {
-    // setupState
-    const { setupState } = instance;
-    if (key in setupState) {
+    const { setupState, props } = instance;
+    if (hasOwn(setupState, key)) {
+      // setupState
       return setupState[key];
+    } else if (hasOwn(props, key)) {
+      // $props
+      return props[key];
     }
     // $el -> the root dom element
     if (key == '$el') {
       return instance.vnode.el;
     }
     // $data
-    // $props
     // $options
     // $parent
     // $root

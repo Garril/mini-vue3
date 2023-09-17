@@ -1,10 +1,13 @@
-import { PublicInstanceProxyHanlders } from "./componentPublicInstance";
+import { shallowReadonly } from '../reactivity/reactive';
+import { initProps } from './componentProps';
+import { PublicInstanceProxyHanlders } from './componentPublicInstance';
 
 export function createComponentInstance(vnode) {
   const component = {
     vnode,
     type: vnode.type,
-    setupState: {}
+    setupState: {},
+    props: {}
   };
   return component;
 }
@@ -15,7 +18,7 @@ export function setupComponent(instance) {
       type: vnode.type 
     }
   */
-  // initProps()
+  initProps(instance, instance.vnode.props);
   // initSlots()
   setupStatefulComponent(instance);
 }
@@ -23,14 +26,13 @@ function setupStatefulComponent(instance) {
   const component = instance.type;
 
   // create proxy for "this" in template
-  instance.proxy = new Proxy(
-    {_: instance},
-    PublicInstanceProxyHanlders
-  );
+  instance.proxy = new Proxy({ _: instance }, PublicInstanceProxyHanlders);
 
   const { setup } = component;
   if (setup) {
-    const setupResult: Function | Object = setup();
+    const setupResult: Function | Object = setup(
+      shallowReadonly(instance.props)
+    );
     handleSetupResult(instance, setupResult);
   }
 }

@@ -1,6 +1,9 @@
 // Based on withStop.ts, realize readonly.
 // look at basic.ts --function createGetter
 // section one
+
+import { isObject } from '../../shared';
+
 // reactive.ts (init enum)
 const enum ReactiveFlags {
   IS_REACTIVE = '__v_isReactive',
@@ -49,14 +52,14 @@ const readOnlyHandlers = {
   // ...
 };
 
-function createActiveObject(raw: any, proxyHandler) {
+function createReactiveObject(raw: any, proxyHandler) {
   return new Proxy(raw, proxyHandler);
 }
 function reactive(raw) {
-  return createActiveObject(raw, mutableHandlers);
+  return createReactiveObject(raw, mutableHandlers);
 }
 function readonly(raw) {
-  return createActiveObject(raw, readOnlyHandlers);
+  return createReactiveObject(raw, readOnlyHandlers);
 }
 function isReactive(obj) {
   return !!obj[ReactiveFlags.IS_REACTIVE];
